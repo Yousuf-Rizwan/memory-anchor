@@ -45,11 +45,43 @@ export const detectFaces = async (imageElement: HTMLImageElement | HTMLVideoElem
 
   try {
     console.log('Detecting faces...');
-    const results = await faceDetector(imageElement, {
+
+    // Always convert input to a canvas + base64 image so transformers.js
+    // receives a supported input type (string data URL)
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Could not get canvas context');
+
+    if (imageElement instanceof HTMLVideoElement) {
+      if (!imageElement.videoWidth || !imageElement.videoHeight) {
+        console.warn('Video dimensions not ready for face detection');
+        return [];
+      }
+      canvas.width = imageElement.videoWidth;
+      canvas.height = imageElement.videoHeight;
+      ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+    } else if (imageElement instanceof HTMLImageElement) {
+      if (!imageElement.naturalWidth || !imageElement.naturalHeight) {
+        console.warn('Image dimensions not ready for face detection');
+        return [];
+      }
+      canvas.width = imageElement.naturalWidth;
+      canvas.height = imageElement.naturalHeight;
+      ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+    } else {
+      // HTMLCanvasElement
+      canvas.width = imageElement.width;
+      canvas.height = imageElement.height;
+      ctx.drawImage(imageElement, 0, 0);
+    }
+
+    const imageData = canvas.toDataURL('image/jpeg', 0.9);
+
+    const results = await faceDetector(imageData, {
       threshold: 0.5,
       percentage: true,
     });
-    
+
     console.log('Face detection results:', results);
     return results;
   } catch (error) {
