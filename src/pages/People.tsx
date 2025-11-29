@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft, User, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 import AddPersonDialog from "@/components/AddPersonDialog";
 
 const People = () => {
+  const { signOut } = useAuth();
   const [people, setPeople] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +38,14 @@ const People = () => {
     loadPeople();
   }, []);
 
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -47,7 +58,17 @@ const People = () => {
             </Link>
           </Button>
           <h1 className="text-2xl font-display font-bold text-foreground">Manage People</h1>
-          <AddPersonDialog onPersonAdded={loadPeople} />
+          <div className="flex items-center gap-2">
+            <AddPersonDialog onPersonAdded={loadPeople} />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSignOut}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </div>
 
