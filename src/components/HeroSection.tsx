@@ -84,27 +84,27 @@ const HeroSection = () => {
             className="flex justify-center lg:justify-end animate-fade-in-up" 
             style={{ animationDelay: "0.3s" }}
           >
-            <div className="flex gap-4 items-start">
-              {/* Daughter card */}
-              <div className="hidden md:block scale-90 opacity-70 hover:opacity-100 hover:scale-95 transition-all duration-300">
-                <PatientScreen 
-                  person={mockPeople.neighbor} 
-                  className="shadow-lg max-w-[280px]"
-                />
-              </div>
-              
+            <div className="flex gap-3 items-start">
               {/* Main card - Daughter */}
               <PatientScreen 
                 person={mockPeople.daughter} 
-                className="shadow-glow max-w-[320px]"
+                className="shadow-glow max-w-[300px]"
               />
               
-              {/* Nurse card */}
-              <div className="hidden md:block scale-90 opacity-70 hover:opacity-100 hover:scale-95 transition-all duration-300">
-                <PatientScreen 
-                  person={mockPeople.nurse} 
-                  className="shadow-lg max-w-[280px]"
-                />
+              {/* Side cards - only on larger screens */}
+              <div className="hidden lg:flex flex-col gap-3">
+                <div className="scale-90 opacity-70 hover:opacity-100 hover:scale-95 transition-all duration-300">
+                  <PatientScreen 
+                    person={mockPeople.nurse} 
+                    className="shadow-lg max-w-[260px]"
+                  />
+                </div>
+                <div className="scale-90 opacity-70 hover:opacity-100 hover:scale-95 transition-all duration-300">
+                  <PatientScreen 
+                    person={mockPeople.neighbor} 
+                    className="shadow-lg max-w-[260px]"
+                  />
+                </div>
               </div>
             </div>
           </div>
