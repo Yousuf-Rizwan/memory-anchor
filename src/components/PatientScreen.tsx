@@ -53,10 +53,10 @@ const PatientScreen = ({ person, isTransitioning = false, className }: PatientSc
                 <span className="text-3xl lg:text-4xl">{person.avatar}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-xl lg:text-2xl font-bold text-foreground truncate">
+                <h3 className="text-xl lg:text-2xl font-bold text-foreground whitespace-normal break-words leading-tight">
                   {person.name}
                 </h3>
-                <p className="text-primary font-medium text-base lg:text-lg">
+                <p className="text-primary font-medium text-base lg:text-lg whitespace-normal break-words">
                   {person.relation} {person.age && `· Age ${person.age}`}
                 </p>
                 <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
