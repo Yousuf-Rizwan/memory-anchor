@@ -19,7 +19,22 @@ interface Person {
 export const useFaceRecognition = (videoRef: React.RefObject<HTMLVideoElement>) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
-  const [recognizedPerson, setRecognizedPerson] = useState<Person | null>(null);
+  
+  // Hardcoded person for testing
+  const hardcodedPerson: Person = {
+    id: 'hardcoded-id',
+    name: 'Yousuf Rizwan',
+    relationship: 'Brother',
+    notes: 'This is your brother, he is 19 and is your caretaker in summer',
+    face_embeddings: null,
+    photo_url: null,
+    birth_date: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    user_id: 'test-user-id'
+  };
+  
+  const [recognizedPerson, setRecognizedPerson] = useState<Person | null>(hardcodedPerson);
   const [people, setPeople] = useState<Person[]>([]);
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
