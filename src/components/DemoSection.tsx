@@ -1,80 +1,37 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PatientScreen from "./PatientScreen";
-import { mockPeople, demoSequence } from "@/data/mockData";
-import { Play, RotateCcw, Pause } from "lucide-react";
+import FaceScanner from "./FaceScanner";
+import FaceManager from "./FaceManager";
+import { mockPeople, PersonData } from "@/data/mockData";
+import { ScanFace, Settings, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const DemoSection = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [isScanning, setIsScanning] = useState(false);
+  const [currentPerson, setCurrentPerson] = useState<PersonData>(mockPeople.alone);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [activeTab, setActiveTab] = useState<string>("demo");
 
-  const currentPerson = mockPeople[demoSequence[currentStep].personId];
-
-  const totalDuration = demoSequence.reduce((acc, step) => acc + step.duration, 0);
-
-  const resetDemo = useCallback(() => {
-    setIsPlaying(false);
-    setCurrentStep(0);
-    setIsTransitioning(false);
-    setElapsedTime(0);
-  }, []);
-
-  const playDemo = useCallback(() => {
-    resetDemo();
-    setIsPlaying(true);
-  }, [resetDemo]);
-
-  const pauseDemo = useCallback(() => {
-    setIsPlaying(false);
-  }, []);
-
-  useEffect(() => {
-    if (!isPlaying) return;
-
-    let accumulatedTime = 0;
-    for (let i = 0; i < currentStep; i++) {
-      accumulatedTime += demoSequence[i].duration;
+  const handlePersonDetected = useCallback((person: PersonData | null) => {
+    if (!person) {
+      setCurrentPerson(mockPeople.alone);
+      return;
     }
-
-    const currentStepDuration = demoSequence[currentStep].duration;
-    const timeInCurrentStep = elapsedTime - accumulatedTime;
-
-    if (timeInCurrentStep >= currentStepDuration) {
-      if (currentStep < demoSequence.length - 1) {
-        setIsTransitioning(true);
-        setTimeout(() => {
-          setCurrentStep((prev) => prev + 1);
-          setIsTransitioning(false);
-        }, 300);
-      } else {
-        setIsPlaying(false);
-      }
+    
+    if (person.id !== currentPerson.id) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentPerson(person);
+        setIsTransitioning(false);
+      }, 300);
     }
-  }, [elapsedTime, currentStep, isPlaying]);
+  }, [currentPerson.id]);
 
-  useEffect(() => {
-    if (!isPlaying) return;
-
-    const interval = setInterval(() => {
-      setElapsedTime((prev) => prev + 100);
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [isPlaying]);
-
-  const getStepProgress = (stepIndex: number) => {
-    let stepStart = 0;
-    for (let i = 0; i < stepIndex; i++) {
-      stepStart += demoSequence[i].duration;
-    }
-    const stepEnd = stepStart + demoSequence[stepIndex].duration;
-
-    if (elapsedTime >= stepEnd) return 100;
-    if (elapsedTime <= stepStart) return 0;
-    return ((elapsedTime - stepStart) / (stepEnd - stepStart)) * 100;
+  const handleStartDemo = () => {
+    setActiveTab("demo");
+    setIsScanning(true);
   };
 
   return (
@@ -83,124 +40,115 @@ const DemoSection = () => {
         {/* Section header */}
         <div className="text-center mb-12">
           <span className="inline-block px-4 py-1.5 rounded-full bg-lavender-light text-secondary-foreground font-medium text-sm mb-4">
-            Interactive Demo
+            Live Face Recognition Demo
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            See it in action in <span className="text-lavender">30 seconds</span>
+            See it in action with <span className="text-lavender">real-time scanning</span>
           </h2>
           <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Watch how MemoryAnchor provides context as different visitors enter the room.
+            Use your camera to test face recognition. Add people in the "Manage Faces" tab, then scan to see them recognized.
           </p>
         </div>
 
-        {/* Demo area */}
-        <div className="max-w-4xl mx-auto">
-          {/* Controls */}
-          <div className="flex justify-center gap-4 mb-8">
-            {!isPlaying && currentStep === 0 && elapsedTime === 0 ? (
-              <Button variant="warm" size="lg" onClick={playDemo} className="group">
-                <Play className="w-5 h-5" />
-                Play Guided Demo
-              </Button>
-            ) : (
-              <>
-                {isPlaying ? (
-                  <Button variant="outline" size="lg" onClick={pauseDemo}>
-                    <Pause className="w-5 h-5" />
-                    Pause
-                  </Button>
-                ) : (
-                  <Button variant="hero" size="lg" onClick={() => setIsPlaying(true)}>
-                    <Play className="w-5 h-5" />
-                    Resume
-                  </Button>
-                )}
-                <Button variant="outline" size="lg" onClick={resetDemo}>
-                  <RotateCcw className="w-5 h-5" />
-                  Reset
-                </Button>
-              </>
-            )}
-          </div>
+        {/* Tabs for Demo and Face Management */}
+        <div className="max-w-5xl mx-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+              <TabsTrigger value="demo" className="flex items-center gap-2">
+                <Camera className="w-4 h-4" />
+                Live Demo
+              </TabsTrigger>
+              <TabsTrigger value="manage" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Manage Faces
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Timeline */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between gap-2 mb-4">
-              {demoSequence.map((step, index) => (
-                <div key={step.label} className="flex-1 flex flex-col items-center">
-                  <div
-                    className={cn(
-                      "w-full h-2 rounded-full bg-border overflow-hidden transition-all duration-300",
-                      currentStep === index && "ring-2 ring-primary ring-offset-2"
-                    )}
+            <TabsContent value="demo" className="space-y-8">
+              {/* Quick start button if not scanning */}
+              {!isScanning && (
+                <div className="text-center mb-8">
+                  <Button 
+                    variant="warm" 
+                    size="lg" 
+                    onClick={handleStartDemo}
+                    className="group"
                   >
-                    <div
-                      className="h-full gradient-accent transition-all duration-100"
-                      style={{ width: `${getStepProgress(index)}%` }}
+                    <ScanFace className="w-5 h-5 mr-2" />
+                    Run 30-Second Demo
+                  </Button>
+                </div>
+              )}
+
+              {/* Main demo area */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                {/* Face Scanner */}
+                <div className="order-2 lg:order-1">
+                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <Camera className="w-5 h-5 text-primary" />
+                    Camera Feed
+                  </h3>
+                  <FaceScanner
+                    onPersonDetected={handlePersonDetected}
+                    isScanning={isScanning}
+                    onScanningChange={setIsScanning}
+                  />
+                </div>
+
+                {/* Patient Screen */}
+                <div className="order-1 lg:order-2">
+                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <ScanFace className="w-5 h-5 text-primary" />
+                    Patient Display
+                  </h3>
+                  <div className="relative">
+                    {/* Status indicator */}
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
+                      <div
+                        className={cn(
+                          "px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                          isScanning
+                            ? "bg-primary text-primary-foreground animate-pulse-soft"
+                            : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {isScanning ? (
+                          <span className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
+                            Scanning Live
+                          </span>
+                        ) : (
+                          "Ready to scan"
+                        )}
+                      </div>
+                    </div>
+
+                    <PatientScreen
+                      person={currentPerson}
+                      isTransitioning={isTransitioning}
+                      className="mt-8"
                     />
                   </div>
-                  <span
-                    className={cn(
-                      "mt-2 text-sm font-medium transition-colors",
-                      currentStep === index ? "text-primary" : "text-muted-foreground"
-                    )}
-                  >
-                    {step.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-            
-            {/* Progress bar */}
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{Math.floor(elapsedTime / 1000)}s</span>
-              <span>{Math.floor(totalDuration / 1000)}s total</span>
-            </div>
-          </div>
-
-          {/* Patient Screen */}
-          <div className="flex justify-center">
-            <div className="relative">
-              {/* Status indicator */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                <div
-                  className={cn(
-                    "px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
-                    isPlaying
-                      ? "bg-primary text-primary-foreground animate-pulse-soft"
-                      : "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {isPlaying ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
-                      Live Demo
-                    </span>
-                  ) : elapsedTime >= totalDuration ? (
-                    "Demo Complete ✓"
-                  ) : (
-                    "Ready to play"
-                  )}
                 </div>
               </div>
 
-              <PatientScreen
-                person={currentPerson}
-                isTransitioning={isTransitioning}
-                className="mt-6"
-              />
-            </div>
-          </div>
+              {/* Demo explanation */}
+              <div className="mt-8 text-center p-6 bg-card rounded-2xl border border-border">
+                <p className="text-muted-foreground">
+                  <strong className="text-foreground">How it works:</strong>{" "}
+                  {currentPerson.id === "alone"
+                    ? "No face detected — showing calm default state"
+                    : currentPerson.id === "unknown"
+                    ? "Face detected but not recognized — consider adding this person"
+                    : `${currentPerson.name} recognized! Showing their profile and context.`}
+                </p>
+              </div>
+            </TabsContent>
 
-          {/* Demo explanation */}
-          <div className="mt-12 text-center">
-            <p className="text-muted-foreground">
-              <strong className="text-foreground">Current scene:</strong>{" "}
-              {currentStep === 0
-                ? "Patient is alone, screen shows calm default state"
-                : `${demoSequence[currentStep].label} has entered — showing their profile and context`}
-            </p>
-          </div>
+            <TabsContent value="manage">
+              <FaceManager />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </section>
