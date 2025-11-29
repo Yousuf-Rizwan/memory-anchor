@@ -95,7 +95,6 @@ const Recognition = () => {
                         size="lg"
                         onClick={handleStartCamera}
                         className="rounded-xl"
-                        disabled={!isInitialized}
                       >
                         {!isInitialized ? (
                           <>
