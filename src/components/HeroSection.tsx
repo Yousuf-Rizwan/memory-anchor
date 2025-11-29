@@ -79,7 +79,7 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Right Content - Patient Screen Preview */}
+          {/* Right Content - Patient Screen Preview with Depth */}
           <div 
             className="flex justify-center lg:justify-end animate-fade-in-up" 
             style={{ animationDelay: "0.3s" }}
@@ -90,9 +90,26 @@ const HeroSection = () => {
               <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-lavender/30 rounded-full animate-float" style={{ animationDelay: "1s" }} />
               <div className="absolute top-1/2 -left-10 w-8 h-8 bg-primary/20 rounded-lg rotate-45 animate-float" style={{ animationDelay: "0.5s" }} />
               
+              {/* Back card - Neighbor */}
+              <div className="absolute -right-8 top-8 scale-90 opacity-40 blur-[1px]">
+                <PatientScreen 
+                  person={mockPeople.neighbor} 
+                  className="shadow-lg"
+                />
+              </div>
+              
+              {/* Middle card - Nurse */}
+              <div className="absolute -right-4 top-4 scale-95 opacity-60">
+                <PatientScreen 
+                  person={mockPeople.nurse} 
+                  className="shadow-lg"
+                />
+              </div>
+              
+              {/* Front card - Daughter (main) */}
               <PatientScreen 
                 person={mockPeople.daughter} 
-                className="shadow-glow"
+                className="shadow-glow relative z-10"
               />
             </div>
           </div>
