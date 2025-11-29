@@ -27,7 +27,16 @@ export const useCamera = () => {
       // Attach stream to video element
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        videoRef.current.play();
+        
+        // Wait for video metadata to load before playing
+        videoRef.current.onloadedmetadata = async () => {
+          try {
+            await videoRef.current?.play();
+            console.log('Video playback started');
+          } catch (error) {
+            console.error('Error playing video:', error);
+          }
+        };
       }
 
       toast({
