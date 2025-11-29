@@ -1,12 +1,12 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Camera, CameraOff, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import PersonInfoPanel from "@/components/PersonInfoPanel";
+import { useCamera } from "@/hooks/useCamera";
 
 const Recognition = () => {
-  const [isActive, setIsActive] = useState(false);
+  const { isActive, videoRef, startCamera, stopCamera } = useCamera();
   
   // Mock data - will be replaced with actual recognition later
   const mockPerson = {
@@ -53,7 +53,7 @@ const Recognition = () => {
                       </p>
                       <Button 
                         size="lg"
-                        onClick={() => setIsActive(true)}
+                        onClick={startCamera}
                         className="rounded-xl"
                       >
                         <Camera className="w-5 h-5 mr-2" />
@@ -63,25 +63,26 @@ const Recognition = () => {
                   </div>
                 ) : (
                   <>
-                    {/* Placeholder for video feed */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                      <div className="text-center space-y-4">
-                        <div className="w-32 h-32 border-4 border-primary rounded-full animate-pulse mx-auto" />
-                        <p className="text-xl font-medium text-foreground">
-                          Video feed will appear here
-                        </p>
-                        <p className="text-sm text-muted-foreground max-w-md">
-                          Camera access and facial recognition features will be integrated in the next phase
-                        </p>
-                      </div>
+                    {/* Video element for camera feed */}
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    
+                    {/* Overlay for face detection UI (placeholder) */}
+                    <div className="absolute top-4 left-4 bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm">
+                      Camera Active - Face detection will be added next
                     </div>
                     
                     {/* Stop button */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
                       <Button 
                         variant="destructive"
                         size="lg"
-                        onClick={() => setIsActive(false)}
+                        onClick={stopCamera}
                         className="rounded-xl shadow-lg"
                       >
                         <CameraOff className="w-5 h-5 mr-2" />
@@ -101,7 +102,7 @@ const Recognition = () => {
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">1.</span>
-                  <span>Start the camera to activate facial recognition</span>
+                  <span>Click "Start Camera" and allow camera access when prompted</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">2.</span>
@@ -109,7 +110,7 @@ const Recognition = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">3.</span>
-                  <span>Their information will appear on the right panel</span>
+                  <span>Their information will appear on the right panel (facial recognition coming soon)</span>
                 </li>
               </ul>
             </Card>
