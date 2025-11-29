@@ -63,6 +63,7 @@ export type Database = {
         Row: {
           birth_date: string | null
           created_at: string | null
+          face_embeddings: Json | null
           id: string
           name: string
           notes: string | null
@@ -74,6 +75,7 @@ export type Database = {
         Insert: {
           birth_date?: string | null
           created_at?: string | null
+          face_embeddings?: Json | null
           id?: string
           name: string
           notes?: string | null
@@ -85,6 +87,7 @@ export type Database = {
         Update: {
           birth_date?: string | null
           created_at?: string | null
+          face_embeddings?: Json | null
           id?: string
           name?: string
           notes?: string | null

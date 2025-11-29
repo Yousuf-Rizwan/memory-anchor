@@ -1,20 +1,42 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, CameraOff, ArrowLeft } from "lucide-react";
+import { Camera, CameraOff, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import PersonInfoPanel from "@/components/PersonInfoPanel";
 import { useCamera } from "@/hooks/useCamera";
+import { useFaceRecognition } from "@/hooks/useFaceRecognition";
 
 const Recognition = () => {
   const { isActive, videoRef, startCamera, stopCamera } = useCamera();
-  
-  // Mock data - will be replaced with actual recognition later
-  const mockPerson = {
-    name: "Helen Johnson",
-    relationship: "Sister",
-    lastSeen: "5 days ago",
-    notes: "Had birthday last week - turned 62. Loves gardening and classical music.",
-    photoUrl: null,
+  const { 
+    isInitialized, 
+    isDetecting, 
+    recognizedPerson, 
+    startDetection, 
+    stopDetection 
+  } = useFaceRecognition(videoRef);
+
+  // Start/stop detection when camera state changes
+  useEffect(() => {
+    if (isActive && isInitialized) {
+      // Wait a bit for video to stabilize
+      const timeout = setTimeout(() => {
+        startDetection();
+      }, 1000);
+      return () => clearTimeout(timeout);
+    } else {
+      stopDetection();
+    }
+  }, [isActive, isInitialized, startDetection, stopDetection]);
+
+  const handleStartCamera = async () => {
+    await startCamera();
+  };
+
+  const handleStopCamera = () => {
+    stopCamera();
+    stopDetection();
   };
 
   return (
@@ -53,11 +75,21 @@ const Recognition = () => {
                       </p>
                       <Button 
                         size="lg"
-                        onClick={startCamera}
+                        onClick={handleStartCamera}
                         className="rounded-xl"
+                        disabled={!isInitialized}
                       >
-                        <Camera className="w-5 h-5 mr-2" />
-                        Start Camera
+                        {!isInitialized ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Loading AI Models...
+                          </>
+                        ) : (
+                          <>
+                            <Camera className="w-5 h-5 mr-2" />
+                            Start Camera
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -72,9 +104,25 @@ const Recognition = () => {
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                     
-                    {/* Overlay for face detection UI (placeholder) */}
-                    <div className="absolute top-4 left-4 bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm">
-                      Camera Active - Face detection will be added next
+                    {/* Status overlay */}
+                    <div className="absolute top-4 left-4 space-y-2 z-10">
+                      <div className="bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                        Camera Active
+                      </div>
+                      
+                      {isDetecting && (
+                        <div className="bg-accent/90 text-accent-foreground px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Analyzing faces...
+                        </div>
+                      )}
+                      
+                      {recognizedPerson && (
+                        <div className="bg-green-600/90 text-white px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm">
+                          ✓ Recognized: {recognizedPerson.name}
+                        </div>
+                      )}
                     </div>
                     
                     {/* Stop button */}
@@ -82,7 +130,7 @@ const Recognition = () => {
                       <Button 
                         variant="destructive"
                         size="lg"
-                        onClick={stopCamera}
+                        onClick={handleStopCamera}
                         className="rounded-xl shadow-lg"
                       >
                         <CameraOff className="w-5 h-5 mr-2" />
@@ -102,15 +150,19 @@ const Recognition = () => {
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">1.</span>
-                  <span>Click "Start Camera" and allow camera access when prompted</span>
+                  <span>Add people with photos in the "Manage People" section first</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">2.</span>
-                  <span>Look at the person you want to identify</span>
+                  <span>Click "Start Camera" and allow camera access when prompted</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">3.</span>
-                  <span>Their information will appear on the right panel (facial recognition coming soon)</span>
+                  <span>Look at a person - AI will detect and match their face</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-accent font-bold">4.</span>
+                  <span>Their information appears on the right panel when recognized</span>
                 </li>
               </ul>
             </Card>
@@ -118,7 +170,7 @@ const Recognition = () => {
 
           {/* Person Info Panel */}
           <div className="lg:col-span-1">
-            <PersonInfoPanel person={isActive ? mockPerson : null} />
+            <PersonInfoPanel person={recognizedPerson} />
           </div>
         </div>
       </div>
