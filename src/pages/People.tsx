@@ -1,24 +1,39 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Plus, User } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import AddPersonDialog from "@/components/AddPersonDialog";
 
 const People = () => {
-  // Mock data - will be replaced with database later
-  const people = [
-    {
-      id: "1",
-      name: "Helen Johnson",
-      relationship: "Sister",
-      lastSeen: "5 days ago",
-    },
-    {
-      id: "2",
-      name: "Michael Chen",
-      relationship: "Son",
-      lastSeen: "2 days ago",
-    },
-  ];
+  const [people, setPeople] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadPeople = async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('people')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPeople(data || []);
+    } catch (error) {
+      console.error('Error loading people:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPeople();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,10 +47,7 @@ const People = () => {
             </Link>
           </Button>
           <h1 className="text-2xl font-display font-bold text-foreground">Manage People</h1>
-          <Button size="sm" className="rounded-xl">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Person
-          </Button>
+          <AddPersonDialog onPersonAdded={loadPeople} />
         </div>
       </div>
 
@@ -52,36 +64,49 @@ const People = () => {
           </Card>
 
           {/* People Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {people.map((person) => (
-              <Card key={person.id} className="p-6 shadow-soft hover:shadow-lg transition-all duration-300">
-                <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-8 h-8 text-white" />
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {people.map((person) => (
+                <Card key={person.id} className="p-6 shadow-soft hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-start gap-4">
+                    {person.photo_url ? (
+                      <img 
+                        src={person.photo_url} 
+                        alt={person.name}
+                        className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-8 h-8 text-white" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="text-xl font-display font-bold text-foreground mb-1">
+                        {person.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {person.relationship}
+                      </p>
+                      {person.face_embeddings && (
+                        <p className="text-xs text-green-600 font-medium">
+                          ✓ Face recognition enabled
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-display font-bold text-foreground mb-1">
-                      {person.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {person.relationship}
+                  {person.notes && (
+                    <p className="mt-3 text-sm text-muted-foreground line-clamp-2">
+                      {person.notes}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Last seen: {person.lastSeen}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 rounded-xl">
-                    Edit
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1 rounded-xl">
-                    View Details
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Empty State (shown when no people) */}
           {people.length === 0 && (
@@ -93,12 +118,9 @@ const People = () => {
                 No people added yet
               </h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Start building your directory by adding the people in your life
+                Start building your directory by adding the people in your life with their photos
               </p>
-              <Button size="lg" className="rounded-xl">
-                <Plus className="w-5 h-5 mr-2" />
-                Add Your First Person
-              </Button>
+              <AddPersonDialog onPersonAdded={loadPeople} />
             </Card>
           )}
         </div>

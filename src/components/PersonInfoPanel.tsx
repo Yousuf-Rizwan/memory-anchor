@@ -1,12 +1,11 @@
 import { Card } from "@/components/ui/card";
-import { User, Calendar, MessageSquare, Heart } from "lucide-react";
+import { User, MessageSquare, Heart } from "lucide-react";
 
 interface PersonInfo {
   name: string;
   relationship: string;
-  lastSeen: string;
-  notes: string;
-  photoUrl: string | null;
+  notes: string | null;
+  photo_url: string | null;
 }
 
 interface PersonInfoPanelProps {
@@ -39,9 +38,9 @@ const PersonInfoPanel = ({ person }: PersonInfoPanelProps) => {
       {/* Photo */}
       <div className="flex justify-center">
         <div className="w-32 h-32 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-          {person.photoUrl ? (
+          {person.photo_url ? (
             <img 
-              src={person.photoUrl} 
+              src={person.photo_url} 
               alt={person.name}
               className="w-full h-full rounded-full object-cover"
             />
@@ -64,27 +63,23 @@ const PersonInfoPanel = ({ person }: PersonInfoPanelProps) => {
 
       {/* Details */}
       <div className="space-y-4 pt-4">
-        <InfoRow 
-          icon={<Calendar className="w-5 h-5" />}
-          label="Last Seen"
-          value={person.lastSeen}
-        />
-        
-        <div className="pt-4 border-t border-border">
-          <div className="flex items-start gap-3 mb-2">
-            <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              <MessageSquare className="w-5 h-5 text-accent" />
-            </div>
-            <div className="flex-1">
-              <p className="font-display font-semibold text-foreground mb-1">
-                Notes & Memories
-              </p>
-              <p className="text-muted-foreground leading-relaxed text-base">
-                {person.notes}
-              </p>
+        {person.notes && (
+          <div className="pt-4 border-t border-border">
+            <div className="flex items-start gap-3 mb-2">
+              <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="w-5 h-5 text-accent" />
+              </div>
+              <div className="flex-1">
+                <p className="font-display font-semibold text-foreground mb-1">
+                  Notes & Memories
+                </p>
+                <p className="text-muted-foreground leading-relaxed text-base">
+                  {person.notes}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Tip */}
@@ -96,25 +91,5 @@ const PersonInfoPanel = ({ person }: PersonInfoPanelProps) => {
     </Card>
   );
 };
-
-const InfoRow = ({ 
-  icon, 
-  label, 
-  value 
-}: { 
-  icon: React.ReactNode; 
-  label: string; 
-  value: string; 
-}) => (
-  <div className="flex items-center gap-3">
-    <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-      {icon}
-    </div>
-    <div className="flex-1">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="font-display font-semibold text-foreground text-lg">{value}</p>
-    </div>
-  </div>
-);
 
 export default PersonInfoPanel;
