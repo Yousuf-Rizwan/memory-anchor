@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, CameraOff, ArrowLeft, Loader2 } from "lucide-react";
+import { Camera, CameraOff, ArrowLeft, Loader2, ImagePlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import PersonInfoPanel from "@/components/PersonInfoPanel";
 import { useCamera } from "@/hooks/useCamera";
 import { useFaceRecognition } from "@/hooks/useFaceRecognition";
+import { useSnapshot } from "@/hooks/useSnapshot";
 
 const Recognition = () => {
   const { isActive, videoRef, startCamera, stopCamera } = useCamera();
@@ -14,8 +15,10 @@ const Recognition = () => {
     isDetecting, 
     recognizedPerson, 
     startDetection, 
-    stopDetection 
+    stopDetection,
+    loadPeople 
   } = useFaceRecognition(videoRef);
+  const { captureSnapshot, isSaving } = useSnapshot();
 
   // Start/stop detection when camera state changes
   useEffect(() => {
@@ -37,6 +40,21 @@ const Recognition = () => {
   const handleStopCamera = () => {
     stopCamera();
     stopDetection();
+  };
+
+  const handleTakeSnapshot = async () => {
+    if (!videoRef.current || !recognizedPerson) return;
+    
+    const success = await captureSnapshot(
+      videoRef.current,
+      recognizedPerson.id,
+      recognizedPerson.name
+    );
+
+    if (success) {
+      // Reload people data to get updated embeddings
+      await loadPeople();
+    }
   };
 
   return (
@@ -125,8 +143,29 @@ const Recognition = () => {
                       )}
                     </div>
                     
-                    {/* Stop button */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+                    {/* Control buttons */}
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
+                      {recognizedPerson && (
+                        <Button 
+                          variant="secondary"
+                          size="lg"
+                          onClick={handleTakeSnapshot}
+                          disabled={isSaving}
+                          className="rounded-xl shadow-lg"
+                        >
+                          {isSaving ? (
+                            <>
+                              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            <>
+                              <ImagePlus className="w-5 h-5 mr-2" />
+                              Save Snapshot
+                            </>
+                          )}
+                        </Button>
+                      )}
                       <Button 
                         variant="destructive"
                         size="lg"
