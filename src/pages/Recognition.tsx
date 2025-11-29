@@ -1,16 +1,13 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, CameraOff, ArrowLeft, Loader2, LogOut } from "lucide-react";
+import { Camera, CameraOff, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import PersonInfoPanel from "@/components/PersonInfoPanel";
 import { useCamera } from "@/hooks/useCamera";
 import { useFaceRecognition } from "@/hooks/useFaceRecognition";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "@/hooks/use-toast";
 
 const Recognition = () => {
-  const { signOut } = useAuth();
   const { isActive, videoRef, startCamera, stopCamera } = useCamera();
   const { 
     isInitialized, 
@@ -42,14 +39,6 @@ const Recognition = () => {
     stopDetection();
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    toast({
-      title: "Signed out",
-      description: "You have been signed out successfully.",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -62,14 +51,7 @@ const Recognition = () => {
             </Link>
           </Button>
           <h1 className="text-2xl font-display font-bold text-foreground">Memory Anchor</h1>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSignOut}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="w-20" /> {/* Spacer for alignment */}
         </div>
       </div>
 
