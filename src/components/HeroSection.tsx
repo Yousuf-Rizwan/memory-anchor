@@ -79,33 +79,21 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Right Content - Patient Screen Cards Side by Side */}
+          {/* Right Content - Patient Screen Preview */}
           <div 
             className="flex justify-center lg:justify-end animate-fade-in-up" 
             style={{ animationDelay: "0.3s" }}
           >
-            <div className="flex gap-3 items-start">
-              {/* Main card - Daughter */}
+            <div className="relative">
+              {/* Floating decorations */}
+              <div className="absolute -top-6 -left-6 w-12 h-12 bg-coral/20 rounded-2xl rotate-12 animate-float" />
+              <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-lavender/30 rounded-full animate-float" style={{ animationDelay: "1s" }} />
+              <div className="absolute top-1/2 -left-10 w-8 h-8 bg-primary/20 rounded-lg rotate-45 animate-float" style={{ animationDelay: "0.5s" }} />
+              
               <PatientScreen 
                 person={mockPeople.daughter} 
-                className="shadow-glow max-w-[300px]"
+                className="shadow-glow"
               />
-              
-              {/* Side cards - only on larger screens */}
-              <div className="hidden lg:flex flex-col gap-3">
-                <div className="scale-90 opacity-70 hover:opacity-100 hover:scale-95 transition-all duration-300">
-                  <PatientScreen 
-                    person={mockPeople.nurse} 
-                    className="shadow-lg max-w-[260px]"
-                  />
-                </div>
-                <div className="scale-90 opacity-70 hover:opacity-100 hover:scale-95 transition-all duration-300">
-                  <PatientScreen 
-                    person={mockPeople.neighbor} 
-                    className="shadow-lg max-w-[260px]"
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </div>
