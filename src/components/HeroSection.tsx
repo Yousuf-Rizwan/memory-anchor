@@ -79,38 +79,33 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Right Content - Patient Screen Preview with Depth */}
+          {/* Right Content - Patient Screen Cards Side by Side */}
           <div 
             className="flex justify-center lg:justify-end animate-fade-in-up" 
             style={{ animationDelay: "0.3s" }}
           >
-            <div className="relative">
-              {/* Floating decorations */}
-              <div className="absolute -top-6 -left-6 w-12 h-12 bg-coral/20 rounded-2xl rotate-12 animate-float" />
-              <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-lavender/30 rounded-full animate-float" style={{ animationDelay: "1s" }} />
-              <div className="absolute top-1/2 -left-10 w-8 h-8 bg-primary/20 rounded-lg rotate-45 animate-float" style={{ animationDelay: "0.5s" }} />
-              
-              {/* Back card - Neighbor */}
-              <div className="absolute -right-8 top-8 scale-90 opacity-40 blur-[1px]">
+            <div className="flex gap-4 items-start">
+              {/* Daughter card */}
+              <div className="hidden md:block scale-90 opacity-70 hover:opacity-100 hover:scale-95 transition-all duration-300">
                 <PatientScreen 
                   person={mockPeople.neighbor} 
-                  className="shadow-lg"
+                  className="shadow-lg max-w-[280px]"
                 />
               </div>
               
-              {/* Middle card - Nurse */}
-              <div className="absolute -right-4 top-4 scale-95 opacity-60">
-                <PatientScreen 
-                  person={mockPeople.nurse} 
-                  className="shadow-lg"
-                />
-              </div>
-              
-              {/* Front card - Daughter (main) */}
+              {/* Main card - Daughter */}
               <PatientScreen 
                 person={mockPeople.daughter} 
-                className="shadow-glow relative z-10"
+                className="shadow-glow max-w-[320px]"
               />
+              
+              {/* Nurse card */}
+              <div className="hidden md:block scale-90 opacity-70 hover:opacity-100 hover:scale-95 transition-all duration-300">
+                <PatientScreen 
+                  person={mockPeople.nurse} 
+                  className="shadow-lg max-w-[280px]"
+                />
+              </div>
             </div>
           </div>
         </div>
